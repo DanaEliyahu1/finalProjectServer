@@ -32,34 +32,31 @@ app.get("/test", async (req, res) => {
 });
 
 */
-
 function sqlQuery(query){
-
-   return DButils.db.all(query,[],(err,rows)=>{
-       console.log(rows);
-        return rows;
-    })
-
+    var promise= new Promise(function(resolve,reject){
+       DButils.db.all(query,[], async(err,rows)=>{
+            resolve(rows);
+        });
+    });
+    return promise;
 }
 
 
 
 
 app.get("/querySearch/:inputGene",(req, res) => {
-    const p= new Promise ((resolve,reject)=>{
-        resolve (sqlQuery("SELECT gene_symbol FROM Genes WHERE gene_symbol = '" + req.params.inputGene + "'" ));
-    })
- 
-    
-    p.then(function success(result){
-        console.log(result);
-        var geneAns=result;
-   
-    console.log("querySearch");
-    res.send(JSON.stringify (geneAns));
- })
-
-
+    var geneAns=undefined;
+    sqlQuery("SELECT gene_symbol FROM Genes WHERE gene_symbol = '" + req.params.inputGene + "'").then(function(result){
+        geneAns=result;
+        res.send(JSON.stringify (geneAns));
+        //if gene exists create info JSON
+        
+        //if gene does not exist 
+                //try in the synonyms (need splits by '; ')
+                //if exist create info JSON
+                //else error not found
+        console.log("querySearch");
+    });
 });
 
 
