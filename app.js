@@ -36,6 +36,7 @@ app.get("/test", async (req, res) => {
 function sqlQuery(query){
 
    return DButils.db.all(query,[],(err,rows)=>{
+       console.log(rows);
         return rows;
     })
 
@@ -51,6 +52,7 @@ app.get("/querySearch/:inputGene",(req, res) => {
  
     
     p.then(function success(result){
+        console.log(result);
         var geneAns=result;
    
     console.log("querySearch");
