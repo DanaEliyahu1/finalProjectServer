@@ -35,7 +35,7 @@ app.get("/test", async (req, res) => {
 
 function sqlQuery(query){
 
-    DButils.db.all(query,[],(err,rows)=>{
+   return DButils.db.all(query,[],(err,rows)=>{
         return rows;
     })
 
@@ -45,9 +45,12 @@ function sqlQuery(query){
 
 
 app.get("/querySearch/:inputGene",(req, res) => {
+    const p= new Promise ((resolve,reject)=>{
+        resolve (sqlQuery("SELECT gene_symbol FROM Genes WHERE gene_symbol = '" + req.params.inputGene + "'" ));
+    })
  
-    sqlQuery("SELECT gene_symbol FROM Genes WHERE gene_symbol = '" + req.params.inputGene + "'" )
-    .then(function(result){
+    
+    p.then(function success(result){
         var geneAns=result;
    
     console.log("querySearch");
