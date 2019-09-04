@@ -39,7 +39,7 @@ app.get("/querySearch/:inputGene", async (req, res) => {
     var finalAns = {};
     var geneAns = await sqlQuery("SELECT * FROM Genes WHERE gene_symbol = '" + req.params.inputGene + "'");
     if (geneAns.length != 0) {
-        finalAns.gene = geneAns;
+        finalAns.gene = geneAns[0];
         console.log(geneAns);
 
     }
@@ -70,10 +70,11 @@ app.get("/querySearch/:inputGene", async (req, res) => {
             var proteins = await sqlQuery("SELECT * FROM Proteins WHERE transcript_id =  '" + transcripts[i].refseq_ID + "'");
             var domains= await sqlQuery("SELECT * FROM DomainEvent WHERE protein_id =  '" + transcripts[i].protein_id + "'");
             finalAns.transcripts[i].exons=exons;
-            finalAns.transcripts[i].proteins=proteins;
+            finalAns.transcripts[i].proteins=proteins[0];
             finalAns.transcripts[i].proteins.domains=domains;
             for (var j=0;j<finalAns.transcripts[i].proteins.domains;j++){
                 var domainType = await sqlQuery("SELECT * FROM DomainType WHERE id =  '" + finalAns.transcripts[i].proteins.domains[j].type_id + "'");
+                console.log(domainType);
                 finalAns.transcripts[i].proteins.domains[j].domainType=domainType;
             }
         }
