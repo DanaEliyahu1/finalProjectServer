@@ -36,13 +36,12 @@ function sqlQuery(query) {
 
 
 app.get("/querySearch/:inputGene", async (req, res) => {
-
-    var geneAns =await sqlQuery("SELECT gene_symbol FROM Genes WHERE gene_symbol = '" + req.params.inputGene + "'");
+    var finalAns = {};
+    var geneAns = await sqlQuery("SELECT * FROM Genes WHERE gene_symbol = '" + req.params.inputGene + "'");
     if (geneAns.length != 0) {
+        finalAns.gene = geneAns;
         console.log(geneAns);
-        res.send(geneAns);
-        console.log("querySearch1");
-        return;
+
     }
     else {
         geneAns = await sqlQuery("SELECT * FROM Genes WHERE synonyms LIKE  '%" + req.params.inputGene + "%'");
@@ -53,19 +52,38 @@ app.get("/querySearch/:inputGene", async (req, res) => {
                 var geneSynonyms = geneAns[i].synonyms.split("; ");
                 for (var j = 0; j < geneSynonyms.length; j++) {
                     if (geneSynonyms[j] == req.params.inputGene) {
-                        res.send(JSON.stringify(geneAns[i]));
-                        console.log("querySearch2");
-                        return;
+                        finalAns.gene = geneAns[i];
+
                     }
 
                 }
             }
 
         }
-        console.log("querySearch3");
-        res.send(undefined);
+
     }
-    });
+    var transcripts = await sqlQuery("SELECT * FROM Transcripts WHERE gene_id =  '" + finalAns.gene.GeneID + "'");
+    finalAns.transcripts=transcripts;
+   
+        for(var i=0; i<finalAns.transcripts.length;i++){
+            var exons = await sqlQuery("SELECT * FROM Exons WHERE transcript_id =  '" + transcripts[i].refseq_ID + "'");
+            var proteins = await sqlQuery("SELECT * FROM Proteins WHERE transcript_id =  '" + transcripts[i].refseq_ID + "'");
+            var domains= await sqlQuery("SELECT * FROM DomainEvent WHERE protein_id =  '" + transcripts[i].protein_id + "'");
+            finalAns.transcripts[i].exons=exons;
+            finalAns.transcripts[i].proteins=proteins;
+            finalAns.transcripts[i].proteins.domains=domains;
+            for (var j=0;j<finalAns.transcripts[i].proteins.domains;j++){
+                var domainType = await sqlQuery("SELECT * FROM DomainType WHERE id =  '" + finalAns.transcripts[i].proteins.domains[j].type_id + "'");
+                finalAns.transcripts[i].proteins.domains[j].domainType=domainType;
+            }
+        }
+
+
+
+    console.log("querySearch3");
+    res.send(finalAns); 
+    console.log(finalAns);
+});
 
 
 
