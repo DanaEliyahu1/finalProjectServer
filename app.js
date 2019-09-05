@@ -53,6 +53,7 @@ app.get("/querySearch/:inputGene", async (req, res) => {
                 for (var j = 0; j < geneSynonyms.length; j++) {
                     if (geneSynonyms[j] == req.params.inputGene) {
                         finalAns.gene = geneAns[i];
+                        break;
 
                     }
 
@@ -72,10 +73,10 @@ app.get("/querySearch/:inputGene", async (req, res) => {
             finalAns.transcripts[i].exons=exons;
             finalAns.transcripts[i].proteins=proteins[0];
             finalAns.transcripts[i].proteins.domains=domains;
-            for (var j=0;j<finalAns.transcripts[i].proteins.domains;j++){
+            for (var j=0;j<finalAns.transcripts[i].proteins.domains.length;j++){
                 var domainType = await sqlQuery("SELECT * FROM DomainType WHERE id =  '" + finalAns.transcripts[i].proteins.domains[j].type_id + "'");
                 console.log(domainType);
-                finalAns.transcripts[i].proteins.domains[j].domainType=domainType;
+                finalAns.transcripts[i].proteins.domains[j].domainType=domainType[0];
             }
         }
 
